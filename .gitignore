@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+support_requests.jsonl
+sample_*.xlsx
+*_walmart.csv
+dl_test.*
+scratchpad/
+.DS_Store

@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shopify → Walmart Review Exporter | eSeller World</title>
+<meta name="description" content="Pull every customer review from any Shopify product page and export a Walmart-ready import file in seconds. Free tool by eSeller World.">
+<style>
+/* Hallmark · macrostructure: Tool-Hero · tone: warm-utilitarian · anchor hue: violet
+ * theme: studied-DNA (esellerworld.com) · Cabinet Grotesk · #9627E6 */
+/*__FONTS__*/
+:root{
+  --ink:#16161a; --ink-soft:#3a3a42; --muted:#6b6b76; --line:#e7e6ea;
+  --paper:#fff; --paper-2:#f8f8f9; --violet:#9627e6; --violet-ink:#7a12c9;
+  --violet-tint:#f4e9ff; --orange:#eb843f; --orange-tint:#fdf1e8; --black:#000;
+  --white:#fff; --star:#f5a623; --ok:#1ea672; --bad:#d94b4b;
+  --font:"Cabinet Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --r-sm:8px; --r-md:14px; --r-lg:20px; --r-xl:28px;
+  --shadow-sm:0 1px 2px rgba(22,22,26,.06),0 4px 14px rgba(22,22,26,.05);
+  --shadow-md:0 10px 30px rgba(22,22,26,.09);
+  --shadow-lg:0 24px 60px rgba(22,22,26,.14);
+  --ease-out:cubic-bezier(.22,.61,.36,1); --wrap:1160px;
+}
+*{box-sizing:border-box}
+html,body{overflow-x:clip}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font);font-weight:400;font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{margin:0;font-weight:800;letter-spacing:-.02em;line-height:1.08;overflow-wrap:anywhere}
+p{margin:0}a{color:inherit;text-decoration:none}
+.wrap{max-width:var(--wrap);margin:0 auto;padding-inline:24px}
+.hide{display:none !important}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--violet-ink);background:var(--violet-tint);padding:7px 12px;border-radius:100px}
+.eyebrow.amber{color:#b5651d;background:var(--orange-tint)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;font-family:var(--font);font-weight:700;font-size:16px;line-height:1;padding:15px 24px;border-radius:var(--r-sm);border:1px solid transparent;cursor:pointer;transition:transform .18s var(--ease-out),background .18s var(--ease-out),box-shadow .18s var(--ease-out);white-space:nowrap}
+.btn-primary{background:var(--black);color:#fff}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.btn-violet{background:var(--violet);color:#fff}
+.btn-violet:hover{transform:translateY(-2px);background:var(--violet-ink);box-shadow:0 10px 26px rgba(150,39,230,.32)}
+.btn:disabled{opacity:.55;cursor:wait;transform:none}
+:focus-visible{outline:3px solid var(--violet);outline-offset:2px;border-radius:4px}
+
+/* header */
+header.site{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.82);backdrop-filter:saturate(150%) blur(12px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:70px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:20px;letter-spacing:-.02em}
+.brand .dot{width:10px;height:10px;border-radius:50%;background:var(--violet);display:inline-block;margin-top:2px}
+.nav-links{display:flex;align-items:center;gap:28px;font-size:15px;font-weight:500}
+.nav-links a{color:var(--ink-soft)}.nav-links a:hover{color:var(--ink)}
+
+/* hero + tool */
+.hero{padding:64px 0 40px;position:relative;overflow:hidden;text-align:center}
+.hero::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(52% 46% at 78% 4%,rgba(150,39,230,.10),transparent 60%),radial-gradient(46% 40% at 8% 96%,rgba(235,132,63,.09),transparent 62%)}
+.hero .eyebrow{margin-bottom:22px}
+.hero h1{font-size:clamp(2.3rem,5vw,3.7rem);max-width:15ch;margin:0 auto}
+.hero h1 .u{background:linear-gradient(transparent 62%,rgba(150,39,230,.22) 62%);padding:0 .06em}
+.hero .sub{margin:22px auto 0;font-size:clamp(1.02rem,1.5vw,1.2rem);color:var(--ink-soft);max-width:56ch}
+.tool{max-width:720px;margin:34px auto 0;background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);padding:24px;text-align:left}
+.tool label{display:block;font-size:13px;font-weight:700;margin-bottom:8px;color:var(--ink)}
+.toolrow{display:flex;gap:12px}
+.toolrow input{flex:1;min-width:0;font-family:var(--font);font-size:16px;color:var(--ink);padding:15px 16px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--paper-2);transition:border .15s var(--ease-out),background .15s}
+.toolrow input:focus{outline:none;border-color:var(--violet);background:#fff;box-shadow:0 0 0 3px rgba(150,39,230,.12)}
+.toolrow input::placeholder{color:#a6a6b0}
+.toolopts{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:14px;font-size:13.5px;color:var(--muted)}
+.linkbtn{background:none;border:0;font-family:var(--font);font-weight:700;font-size:13.5px;color:var(--violet-ink);cursor:pointer;padding:0}
+.linkbtn:hover{text-decoration:underline}
+.status{margin-top:14px;font-size:14.5px;color:var(--ink-soft);min-height:20px}
+.status .err{color:var(--bad);font-weight:600}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid #d9d4e2;border-top-color:var(--violet);border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:8px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* results */
+.results{background:var(--paper-2);border-block:1px solid var(--line);padding:40px 0}
+.results-head{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(90px,1fr));gap:12px;flex:1;min-width:280px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:var(--r-sm);padding:12px 14px}
+.stat b{display:block;font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.stat span{color:var(--muted);font-size:12.5px}
+.dlrow{display:flex;gap:10px;flex-wrap:wrap}
+.prodname{margin:16px 0 4px;color:var(--muted);font-size:14px}
+.tablewrap{margin-top:12px;overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:var(--r-md)}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:640px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--black);color:#fff;font-size:11px;text-transform:uppercase;letter-spacing:.04em;position:sticky;top:0}
+td.r{white-space:nowrap;color:var(--star);font-weight:700}
+tr:nth-child(even) td{background:var(--paper-2)}
+.more{margin-top:10px;color:var(--muted);font-size:12.5px}
+
+/* app strip */
+.apps{border-bottom:1px solid var(--line);background:#fff}
+.apps .wrap{padding-block:24px;display:flex;align-items:center;gap:14px 30px;flex-wrap:wrap;justify-content:center}
+.apps .lbl{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.apps .chip{font-weight:700;font-size:17px;color:var(--ink);opacity:.72}
+.apps .chip.verified::after{content:"✓";color:var(--ok);font-size:13px;margin-left:5px}
+
+section.band{padding:96px 0}
+.sec-head{max-width:640px;margin:0 auto 56px;text-align:center}
+.sec-head h2{font-size:clamp(2rem,3.6vw,2.8rem)}
+.sec-head p{margin-top:16px;color:var(--ink-soft);font-size:1.06rem}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:30px 26px;box-shadow:var(--shadow-sm);transition:transform .22s var(--ease-out),box-shadow .22s}
+.card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.card .num{font-size:14px;font-weight:800;color:var(--violet);letter-spacing:.04em}
+.card .ic{width:52px;height:52px;border-radius:13px;display:grid;place-items:center;background:var(--violet-tint);margin:16px 0 18px}
+.card:nth-child(2) .ic{background:var(--orange-tint)}.card:nth-child(3) .ic{background:#e8f6f0}
+.card h3{font-size:20px;margin-bottom:9px}.card p{color:var(--ink-soft);font-size:15.5px}
+
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;counter-reset:s}
+.step{padding:30px 26px 28px;border:1px solid var(--line);border-radius:var(--r-md);background:#fff}
+.step::before{counter-increment:s;content:counter(s);font-weight:800;font-size:15px;color:#fff;background:var(--violet);width:34px;height:34px;border-radius:9px;display:grid;place-items:center;margin-bottom:16px}
+.step h3{font-size:19px;margin-bottom:8px}.step p{color:var(--ink-soft);font-size:15px}
+
+.note-band{padding-top:0}
+.note{max-width:900px;margin:0 auto;border-left:4px solid var(--violet);background:var(--paper-2);border-radius:0 var(--r-md) var(--r-md) 0;padding:26px 30px}
+.note h3{font-size:19px;margin-bottom:10px}
+.note p{color:var(--ink-soft);font-size:15.5px}
+.note a{color:var(--violet-ink);font-weight:600;text-decoration:underline}
+
+/* support form */
+.support-card{max-width:640px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-md);padding:30px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:13px;font-weight:700;margin-bottom:7px;color:var(--ink)}
+.field input,.field textarea{width:100%;font-family:var(--font);font-size:16px;color:var(--ink);padding:13px 14px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--paper-2);transition:border .15s var(--ease-out),background .15s}
+.field textarea{resize:vertical;min-height:112px;line-height:1.5}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--violet);background:#fff;box-shadow:0 0 0 3px rgba(150,39,230,.12)}
+.field input::placeholder,.field textarea::placeholder{color:#a6a6b0}
+.btn-lg{padding:16px 28px;font-size:16px}
+.s-status{margin-top:12px;font-size:14px;min-height:18px}
+.s-status.err{color:var(--bad);font-weight:600}
+.s-success{display:none;text-align:center;padding:10px 4px}
+.s-success .s-badge{width:56px;height:56px;margin:0 auto 16px;border-radius:50%;background:var(--violet-tint);color:var(--violet);display:grid;place-items:center;font-size:28px;font-weight:800}
+.s-success h3{font-size:22px;margin-bottom:8px}
+.s-success p{color:var(--ink-soft)}
+form.sent .form-body{display:none}
+form.sent .s-success{display:block}
+
+/* about us */
+.about-grid{display:grid;grid-template-columns:1fr 1.08fr;gap:52px;align-items:center}
+.about-copy h2{font-size:clamp(2rem,3.6vw,2.8rem);margin-bottom:18px}
+.about-copy p{color:var(--ink-soft);font-size:1.05rem}
+.about-video{border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-lg);background:#000}
+.about-video video{width:100%;height:auto;display:block;border-radius:var(--r-lg)}
+.trusted{margin-top:64px;text-align:center}
+.trusted h3{font-size:22px;margin-bottom:22px}
+.badges{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.badge{background:#fff;border:1px solid var(--line);border-radius:var(--r-md);padding:13px 20px;font-weight:700;font-size:14px;color:var(--ink-soft);box-shadow:var(--shadow-sm)}
+@media (max-width:960px){.about-grid{grid-template-columns:1fr;gap:32px}}
+
+.faq{max-width:820px;margin:0 auto}
+.qa{border-bottom:1px solid var(--line)}
+.qa summary{list-style:none;cursor:pointer;padding:24px 44px 24px 4px;position:relative;font-weight:700;font-size:18px}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary::after{content:"+";position:absolute;right:6px;top:22px;font-size:24px;color:var(--violet)}
+.qa[open] summary::after{content:"–"}
+.qa .a{padding:0 44px 24px 4px;color:var(--ink-soft);font-size:16px}
+.qa .a a{color:var(--violet-ink);font-weight:600;text-decoration:underline}
+
+footer.site{background:var(--ink);color:#c9c8d2;padding:64px 0 30px}
+.foot-grid{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px}
+footer .brand{color:#fff}
+.foot-blurb{margin-top:14px;font-size:14.5px;color:#9a99a6;max-width:34ch}
+.foot-contact{margin-top:16px;font-size:14.5px;display:grid;gap:6px}
+.foot-contact a{color:#c9c8d2}.foot-contact a:hover{color:#fff}
+.foot-col h4{color:#fff;font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px}
+.foot-col ul{list-style:none;padding:0;margin:0;display:grid;gap:11px;font-size:14.5px}
+.foot-col a{color:#a9a8b4}.foot-col a:hover{color:#fff}
+.foot-bot{margin-top:48px;padding-top:22px;border-top:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13.5px;color:#8b8a97}
+
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .6s var(--ease-out),transform .6s var(--ease-out)}
+.reveal.in{opacity:1;transform:none}
+
+@media (max-width:960px){
+  .cards,.steps{grid-template-columns:1fr}
+  .foot-grid{grid-template-columns:1fr 1fr}
+  .nav-links{display:none}
+}
+@media (max-width:560px){
+  body{font-size:16px}.wrap{padding-inline:18px}
+  section.band{padding:68px 0}
+  .toolrow{flex-direction:column}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .foot-grid{grid-template-columns:1fr}
+  .tool{padding:20px}
+}
+@media (prefers-reduced-motion:reduce){
+  .reveal{transition:opacity .15s linear;transform:none}
+  *{scroll-behavior:auto !important}
+  .btn:hover,.card:hover{transform:none}
+  .spin{animation:none}
+}
+</style>
+</head>
+<body>
+
+<section class="hero" id="tool">
+  <div class="wrap">
+    <span class="eyebrow">Free tool · Shopify → Walmart</span>
+    <h1>Move your Shopify reviews to your <span class="u">Walmart</span> listings</h1>
+    <p class="sub">Paste any product page URL. It pulls every review — rating, name, title, text and date — and exports a Walmart-ready file. No sign-up.</p>
+
+    <div class="tool">
+      <label for="u">Product page URL</label>
+      <div class="toolrow">
+        <input id="u" type="url" inputmode="url" placeholder="https://store.com/products/your-product" autocomplete="off">
+        <button id="go" class="btn btn-violet">Scrape reviews</button>
+      </div>
+      <div class="toolopts">
+        <button id="demo" class="linkbtn" type="button">Try an example</button>
+        <span>Reads Okendo · Yotpo · Judge.me · Loox · Stamped · REVIEWS.io</span>
+      </div>
+      <div class="status" id="st"></div>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section class="results hide" id="res">
+  <div class="wrap">
+    <div class="results-head">
+      <div class="stats">
+        <div class="stat"><b id="s_count">0</b><span>Reviews</span></div>
+        <div class="stat"><b id="s_avg">0</b><span>Avg rating</span></div>
+        <div class="stat"><b id="s_prov">—</b><span>Review app</span></div>
+        <div class="stat"><b id="s_ver">0</b><span>Verified</span></div>
+      </div>
+      <div class="dlrow">
+        <button id="dxlsx" class="btn btn-primary">Download Excel</button>
+        <button id="dcsv" class="btn btn-violet">Walmart CSV</button>
+      </div>
+    </div>
+    <div class="prodname" id="s_name"></div>
+    <div class="tablewrap">
+      <table id="tbl">
+        <thead><tr><th>#</th><th>Rating</th><th>Name</th><th>Title</th><th>Review</th><th>Date</th><th>Verified</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="more" id="more"></div>
+  </div>
+</section>
+
+<div class="apps">
+  <div class="wrap">
+    <span class="lbl">Reads every major review app</span>
+    <span class="chip verified">Okendo</span>
+    <span class="chip verified">Yotpo</span>
+    <span class="chip verified">Judge.me</span>
+    <span class="chip">Loox</span>
+    <span class="chip">Stamped</span>
+    <span class="chip">REVIEWS.io</span>
+  </div>
+</div>
+
+<section class="band">
+  <div class="wrap">
+    <div class="note reveal">
+      <h3>Before you upload to Walmart — read this</h3>
+      <p>Walmart has no "upload reviews" button in Seller Center. The legitimate route is Walmart's free <a href="https://marketplace.walmart.com/review-syndication-program" target="_blank" rel="noopener">Review Syndication Program</a>, which ingests this CSV. Syndicate only reviews <b>you own</b> — the ones customers left on your own store, for the same product. Walmart matches each review to your listing by GTIN/UPC + Item ID + SKU, so those three columns come blank for you to fill.</p>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="about" style="padding-top:0">
+  <div class="wrap">
+    <div class="about-grid">
+      <div class="about-copy reveal">
+        <h2>About us</h2>
+        <p>We started eSeller World because we needed it ourselves. As experienced Amazon sellers, we struggled to find service providers who truly understood the challenges and complexity of selling on the platform. So, we created the solution we were looking for — a partner that's rooted in real-world seller experience, focused on results, and committed to helping brands succeed on Amazon and beyond.</p>
+      </div>
+      <div class="about-video reveal">
+        <video src="/about.mp4" controls preload="metadata" playsinline></video>
+      </div>
+    </div>
+    <div class="trusted reveal">
+      <h3>Trusted by</h3>
+      <div class="badges">
+        <span class="badge">Amazon Certified 3D Content Provider</span>
+        <span class="badge">Amazon SPN · Solution Provider Network</span>
+        <span class="badge">Amazon Ads Verified Partner</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="support" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <span class="eyebrow amber">Need a hand?</span>
+      <h2>Trouble scraping or downloading?</h2>
+      <p>Tell us what happened and we'll take a look — often it's just a review app we can wire up fast.</p>
+    </div>
+    <div class="support-card reveal">
+      <form id="support-form" novalidate>
+        <div class="form-body">
+          <div class="field">
+            <label for="sname">Your name</label>
+            <input id="sname" type="text" placeholder="Jordan" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="surl">Storefront / product URL</label>
+            <input id="surl" type="url" inputmode="url" placeholder="https://store.com/products/..." required>
+          </div>
+          <div class="field">
+            <label for="sdesc">What went wrong?</label>
+            <textarea id="sdesc" rows="4" placeholder="Which app, what error, and what you expected to happen." required></textarea>
+          </div>
+          <button class="btn btn-violet btn-lg" type="submit" id="ssend">Send it to us →</button>
+          <p class="s-status" id="s_status"></p>
+        </div>
+        <div class="s-success" role="status" aria-live="polite">
+          <div class="s-badge">✓</div>
+          <h3>Got it — thanks!</h3>
+          <p>We've logged your issue and will look into it. If it's a new review app, we'll get it supported.</p>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="faq" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head reveal"><span class="eyebrow">FAQ</span><h2>Good questions</h2></div>
+    <div class="faq reveal">
+      <details class="qa" open><summary>Is it really free?</summary><div class="a">Yes — a free resource from eSeller World for sellers moving between Shopify and Walmart. Paste a URL and go.</div></details>
+      <details class="qa"><summary>Which review apps work?</summary><div class="a">Okendo, Yotpo and Judge.me are live-tested and verified. Loox, Stamped, REVIEWS.io and Shopify Product Reviews are supported too, plus a fallback for others. Hit an app it doesn't know and it tells you.</div></details>
+      <details class="qa"><summary>How do reviews get onto Walmart?</summary><div class="a">Through Walmart's free <a href="https://marketplace.walmart.com/review-syndication-program" target="_blank" rel="noopener">Review Syndication Program</a>, which ingests a CSV. This tool builds that CSV, matching columns included.</div></details>
+      <details class="qa"><summary>Can eSeller World set this up for me?</summary><div class="a">Absolutely — Walmart account management and listing optimization are what we do. <a href="https://esellerworld.com" target="_blank" rel="noopener">Book a call</a> and we'll handle syndication end to end.</div></details>
+    </div>
+  </div>
+</section>
+
+<script>
+(function(){
+  var els=document.querySelectorAll('.reveal');
+  if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in')});return;}
+  var io=new IntersectionObserver(function(en){en.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target);}})},{threshold:.14});
+  els.forEach(function(e){io.observe(e);});
+})();
+
+var $=function(s){return document.querySelector(s);}, TB=$('#tbl tbody'), TOKEN=null;
+function setStatus(h){$('#st').innerHTML=h;}
+function esc(s){return (s||'').replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+async function scrape(url){
+  $('#go').disabled=true; $('#res').classList.add('hide');
+  setStatus('<span class="spin"></span> Detecting review app and pulling pages…');
+  try{
+    var r=await fetch('/scrape?url='+encodeURIComponent(url));
+    var j=await r.json();
+    if(!j.ok){ setStatus('<span class="err">'+esc(j.error)+'</span>'); $('#go').disabled=false; return; }
+    TOKEN=j.token; render(j);
+    setStatus('Done — '+j.count+' reviews from '+j.provider+'.');
+  }catch(e){ setStatus('<span class="err">'+e+'</span>'); }
+  $('#go').disabled=false;
+}
+function render(j){
+  $('#res').classList.remove('hide');
+  $('#s_count').textContent=j.count; $('#s_prov').textContent=j.provider;
+  $('#s_avg').textContent=j.avg; $('#s_ver').textContent=j.verified;
+  $('#s_name').textContent=j.product_name||'';
+  TB.innerHTML='';
+  j.preview.forEach(function(x,i){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td>'+(i+1)+'</td><td class="r">'+x.rating+'★</td><td>'+esc(x.reviewer_name)+'</td><td>'+esc(x.review_title)+'</td><td>'+esc((x.review_text||'').slice(0,140))+'</td><td>'+x.review_date+'</td><td>'+x.verified_purchaser+'</td>';
+    TB.appendChild(tr);
+  });
+  $('#more').textContent = j.count>j.preview.length ? ('Showing first '+j.preview.length+' of '+j.count+' — the download has all of them.') : '';
+  $('#res').scrollIntoView({behavior:'smooth',block:'start'});
+}
+$('#go').onclick=function(){var u=$('#u').value.trim(); if(u) scrape(u);};
+$('#u').addEventListener('keydown',function(e){if(e.key==='Enter')$('#go').click();});
+$('#demo').onclick=function(){$('#u').value='https://beardbrand.com/products/norse-winter-sea-salt-spray'; $('#go').click();};
+$('#dxlsx').onclick=function(){if(TOKEN)location='/download?token='+TOKEN+'&fmt=xlsx';};
+$('#dcsv').onclick=function(){if(TOKEN)location='/download?token='+TOKEN+'&fmt=csv';};
+
+/* support / help form */
+(function(){
+  var f=document.getElementById('support-form'); if(!f) return;
+  var st=document.getElementById('s_status');
+  f.addEventListener('submit',async function(e){
+    e.preventDefault();
+    var name=document.getElementById('sname').value.trim();
+    var url=document.getElementById('surl').value.trim();
+    var desc=document.getElementById('sdesc').value.trim();
+    if(!name||!url||!desc){ st.className='s-status err'; st.textContent='Please fill in all three fields.'; f.reportValidity(); return; }
+    var btn=document.getElementById('ssend'); btn.disabled=true;
+    st.className='s-status'; st.textContent='Sending…';
+    try{
+      var r=await fetch('/support',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({name:name,url:url,description:desc})});
+      var j=await r.json();
+      if(j.ok){ f.classList.add('sent'); }
+      else { st.className='s-status err'; st.textContent=j.error||'Something went wrong — please try again.'; }
+    }catch(err){ st.className='s-status err'; st.textContent='Network error — please try again.'; }
+    btn.disabled=false;
+  });
+})();
+</script>
+</body>
+</html>

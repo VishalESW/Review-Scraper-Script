@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.git/
+.gitignore
+scratchpad/
+support_requests.jsonl
+sample_*.xlsx
+*_walmart.csv
+dl_test.*
+landing-page.html
+README.md
+DEPLOY-dokploy.md
