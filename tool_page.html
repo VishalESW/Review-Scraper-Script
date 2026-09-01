@@ -393,6 +393,21 @@ $('#dcsv').onclick=function(){if(TOKEN)location='/download?token='+TOKEN+'&fmt=c
     btn.disabled=false;
   });
 })();
+
+/* auto-resize when embedded in an iframe — posts height to the parent page so the
+   frame grows/shrinks with content (results, video, etc.) — no inner scrollbar */
+(function(){
+  if(window.parent===window) return;  // not embedded
+  var last=0;
+  function postHeight(){
+    var h=Math.ceil(document.documentElement.scrollHeight);
+    if(h!==last){ last=h; try{ parent.postMessage({eslrTool:'height',height:h},'*'); }catch(e){} }
+  }
+  window.addEventListener('load',postHeight);
+  window.addEventListener('resize',postHeight);
+  if(window.ResizeObserver){ new ResizeObserver(postHeight).observe(document.body); }
+  setInterval(postHeight,1200);
+})();
 </script>
 </body>
 </html>
