@@ -58,6 +58,8 @@ _RL = {}  # ip -> [timestamps]
 
 
 def rate_ok(ip):
+    if RATE_MAX <= 0:            # RATE_LIMIT_MAX=0 disables rate limiting entirely
+        return True
     now = time.time()
     with _RL_LOCK:
         hits = [t for t in _RL.get(ip, []) if now - t < RATE_WINDOW]
@@ -1045,7 +1047,8 @@ class Handler(BaseHTTPRequestHandler):
             if not rate_ok(self.client_ip()):
                 return self._send(429, json.dumps({"ok": False,
                     "error": f"Too many requests — please wait a moment and try again "
-                             f"(limit {RATE_MAX} per {RATE_WINDOW}s)."}))
+                             f"(limit {RATE_MAX} per {RATE_WINDOW}s)."}),
+                    headers={"Retry-After": str(RATE_WINDOW)})
             url = parse_qs(p.query).get("url", [""])[0]
             if not url:
                 return self._send(200, json.dumps({"ok": False, "error": "No URL given."}))
@@ -1093,7 +1096,8 @@ class Handler(BaseHTTPRequestHandler):
         if p.path == "/support":
             if not rate_ok(self.client_ip()):
                 return self._send(429, json.dumps({"ok": False,
-                    "error": "Too many requests — please wait a moment and try again."}))
+                    "error": "Too many requests — please wait a moment and try again."}),
+                    headers={"Retry-After": str(RATE_WINDOW)})
             try:
                 length = int(self.headers.get("Content-Length", 0) or 0)
                 raw = self.rfile.read(length) if length else b"{}"
