@@ -155,31 +155,84 @@ def make_review(rating, title, body, name, date_iso, verified, recommended, extr
 
 
 # --------------------------------------------------------------------------
-# Provider: OKENDO  (verified)
+# Provider: OKENDO
+# Works on classic stores (inline settings) AND modern JS-rendered themes, where
+# the subscriberId is no longer in the page HTML but is baked into the referenced
+# okendo widget bundle (e.g. media-dynamic.okendo.io/images/{subscriberId}/...),
+# and the product id comes from Shopify's /products/{handle}.js.
 # --------------------------------------------------------------------------
-def okendo_scrape(html, host, progress):
-    sub = None
+# A UUID that follows an okendo.io path segment is the store's subscriberId.
+OKENDO_SUB_RE = re.compile(
+    r'okendo\.io/(?:[a-z0-9_-]+/)*?'
+    r'([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})', re.I)
+
+
+def _okendo_subscriber_ids(html):
+    """Resolve the Okendo subscriberId: inline first, else from the widget bundle(s)."""
+    ids = []
     m = re.search(r'"subscriberId"\s*:\s*"([0-9a-fA-F-]{36})"', html)
     if m:
-        sub = m.group(1)
-    if not sub:
-        m = re.search(r'api\.okendo\.io/v1/stores/([0-9a-fA-F-]{36})', html)
-        if m:
-            sub = m.group(1)
+        ids.append(m.group(1))
+    ids += OKENDO_SUB_RE.findall(html)              # api./media-dynamic.okendo.io/.../{id}
+    if not ids:
+        # JS-rendered theme: the id lives inside the referenced okendo *.js bundle(s).
+        assets = re.findall(r'["\']((?://|https?://)[^"\']*okendo[^"\']*\.js)', html, re.I)
+        for a in list(dict.fromkeys(assets))[:4]:
+            url = ("https:" + a) if a.startswith("//") else a
+            try:
+                js, _ = http_get(url)
+            except Exception:
+                continue
+            ids += OKENDO_SUB_RE.findall(js)
+            if ids:
+                break
+    return _uniq(ids)
 
-    pid = None
+
+def _okendo_product_id(html, page_url):
+    """Resolve the Okendo product id (shopify-<numeric id>)."""
     for pat in (r'data-oke-[\w-]*product-id=["\']([^"\']+)["\']',
                 r'"productId"\s*:\s*"(shopify-\d+)"',
                 r'okendoProductId["\']?\s*[:=]\s*["\']([^"\']+)["\']'):
         m = re.search(pat, html)
         if m:
-            pid = m.group(1)
-            break
+            return m.group(1)
+    prod = shopify_product(page_url)               # /products/{handle}.js
+    if prod.get("id"):
+        return "shopify-" + prod["id"]
+    # Clean/alias product URL (no /products/ in path): use the canonical product handle.
+    host = urlparse(page_url).netloc
+    cm = (re.search(r'rel=["\']canonical["\'][^>]+/products/([a-z0-9][a-z0-9-]*)', html, re.I)
+          or re.search(r'og:url["\'][^>]+content=["\'][^"\']*/products/([a-z0-9][a-z0-9-]*)',
+                       html, re.I))
+    if cm:
+        p = shopify_product(f"https://{host}/products/{cm.group(1)}")
+        if p.get("id"):
+            return "shopify-" + p["id"]
+    return None
 
-    if not sub or not pid:
-        raise RuntimeError("Okendo detected but could not read subscriberId/productId from the page.")
+
+def okendo_scrape(html, host, progress, page_url):
+    pid = _okendo_product_id(html, page_url)
+    if not pid:
+        raise RuntimeError("OKENDO_NO_PRODUCT")    # sentinel -> page-vs-product guidance
+    subs = _okendo_subscriber_ids(html)
+    if not subs:
+        raise RuntimeError("Okendo detected but could not resolve the store's subscriber id.")
 
     base = "https://api.okendo.io/v1"
+    sub = subs[0]
+    if len(subs) > 1:                              # pick the id that actually returns reviews
+        for c in subs:
+            try:
+                j, _ = http_get(f"{base}/stores/{c}/products/{quote(pid)}/reviews?limit=1",
+                                as_json=True)
+                if j.get("reviews"):
+                    sub = c
+                    break
+            except Exception:
+                continue
+
     url = f"{base}/stores/{sub}/products/{quote(pid)}/reviews?limit=100&orderBy=date%20desc"
     reviews, product_name, pages = [], "", 0
     while url and pages < 200:
@@ -204,7 +257,7 @@ def okendo_scrape(html, host, progress):
         nu = j.get("nextUrl")
         if not nu:
             break
-        url = nu if nu.startswith("http") else "https://api.okendo.io/v1" + nu
+        url = nu if nu.startswith("http") else base + nu
     return reviews, product_name, "Okendo"
 
 
@@ -680,8 +733,9 @@ UNWIRED = [
 # Distinctive markers per provider (avoid bare brand names that appear in blogs/themes).
 # Each handler is normalised to signature (html, host, progress, page_url).
 PROVIDERS = [
-    ("Okendo", ["oke-reviews-settings", "api.okendo.io", "okereviews", "data-oke-"],
-     lambda h, ho, pr, u: okendo_scrape(h, ho, pr)),
+    ("Okendo", ["oke-reviews-settings", "api.okendo.io", "okereviews", "data-oke-",
+                "okendoreviews", "okendo.io", "media-dynamic.okendo"],
+     lambda h, ho, pr, u: okendo_scrape(h, ho, pr, u)),
     ("Yotpo", ["staticw2.yotpo.com", "cdn-widgetsrepository.yotpo.com",
                "yotpo-reviews-main-widget", "yotpo-main-widget", "yotpowidgetsinstance"],
      lambda h, ho, pr, u: yotpo_scrape(h, ho, pr)),
@@ -740,6 +794,18 @@ def detect_and_scrape(page_url, progress):
             continue
 
     if not reviews:
+        # Non-product URL (landing / funnel / collection / home): reviews are tied to a
+        # specific product, so point the user at the product URLs found on the page.
+        if "/products/" not in parsed.path.lower() and "/products/" not in urlparse(final).path.lower():
+            handles = [h for h in _uniq(re.findall(r'/products/([a-z0-9][a-z0-9-]{2,})', low))
+                       if not h.endswith(".js")][:6]
+            if handles:
+                links = "\n".join(f"  • https://{host}/products/{h}" for h in handles)
+                raise RuntimeError(
+                    "This looks like a landing/collection page, not a product page. Reviews are "
+                    "tied to a specific product — open the product you want and paste its URL "
+                    "(it has /products/… in it). Products found on this page:\n" + links)
+
         hit = next((label for token, label in UNWIRED if token in low), None)
         try:
             reviews, name, prov = jsonld_scrape(html, host, progress, page_url)
