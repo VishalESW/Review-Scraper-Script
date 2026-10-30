@@ -530,6 +530,35 @@ def shopify_product(page_url):
         return {}
 
 
+def shopify_resolve_handle(host, alias):
+    """Map a short/alias product handle to the real one via Shopify predictive search.
+    Lets clean URLs like /products/ashwagandha-capsules (real handle is longer) work."""
+    if not alias:
+        return None
+    q = alias.replace("-", " ").strip()
+    try:
+        j, _ = http_get(f"https://{host}/search/suggest.json?q={quote(q)}"
+                        f"&resource[type]=product&resource[limit]=10", as_json=True)
+        prods = (((j.get("resources") or {}).get("results") or {}).get("products") or [])
+    except Exception:
+        return None
+    handles = [p.get("handle", "") for p in prods if p.get("handle")]
+    if not handles:
+        return None
+    a = alias.lower()
+    for h in handles:                       # exact handle
+        if h.lower() == a:
+            return h
+    for h in handles:                       # one is a prefix of the other
+        if h.lower().startswith(a) or a.startswith(h.lower()):
+            return h
+    first = a.split("-")[0]
+    for h in handles:                       # share the first word
+        if h.lower().startswith(first):
+            return h
+    return handles[0]                       # else the most relevant match
+
+
 def strip_tags(s):
     return unescape(re.sub(r"<[^>]+>", "", s or "")).strip()
 
@@ -772,7 +801,32 @@ def detect_and_scrape(page_url, progress):
             "That's a marketplace listing, not a Shopify store. This tool reads a store's own "
             "Shopify review widget — paste your product page URL from your website instead.")
 
-    html, final = http_get(page_url)
+    # Fetch the page; recover from 404s (short/alias product handles) and never let a
+    # raw network error escape — always surface a clean, actionable message.
+    try:
+        html, final = http_get(page_url)
+    except HTTPError as e:
+        if e.code == 404 and "/products/" in parsed.path.lower():
+            real = shopify_resolve_handle(host, product_handle(parsed.path))
+            if real:
+                page_url = f"https://{host}/products/{real}"
+                parsed = urlparse(page_url)
+                try:
+                    html, final = http_get(page_url)
+                except Exception:
+                    raise RuntimeError("That product URL returned 404 and the closest match "
+                                       "couldn't be loaded. Open the product on your store and "
+                                       "paste its exact URL.")
+            else:
+                raise RuntimeError("That product URL returned 404 (not found) and no matching "
+                                   "product could be located. Check the URL is correct and the "
+                                   "product is published.")
+        else:
+            raise RuntimeError(f"Couldn't load that URL (HTTP {e.code}). Check the link is "
+                               f"correct and publicly accessible.")
+    except URLError as e:
+        raise RuntimeError(f"Couldn't reach that URL ({getattr(e, 'reason', e)}). "
+                           f"Check the link is correct.")
     low = html.lower()
 
     # Score each provider by how many distinctive markers appear; strongest wins.
