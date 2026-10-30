@@ -336,10 +336,11 @@ footer .brand{color:#fff}
   els.forEach(function(e){io.observe(e);});
 })();
 
-var $=function(s){return document.querySelector(s);}, TB=$('#tbl tbody'), TOKEN=null;
+var $=function(s){return document.querySelector(s);}, TB=$('#tbl tbody'), TOKEN=null, LASTURL=null;
 function setStatus(h){$('#st').innerHTML=h;}
 function esc(s){return (s||'').replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
 async function scrape(url){
+  LASTURL=url;
   $('#go').disabled=true; $('#res').classList.add('hide');
   setStatus('<span class="spin"></span> Detecting review app and pulling pages…');
   try{
@@ -368,8 +369,13 @@ function render(j){
 $('#go').onclick=function(){var u=$('#u').value.trim(); if(u) scrape(u);};
 $('#u').addEventListener('keydown',function(e){if(e.key==='Enter')$('#go').click();});
 $('#demo').onclick=function(){$('#u').value='https://beardbrand.com/products/norse-winter-sea-salt-spray'; $('#go').click();};
-$('#dxlsx').onclick=function(){if(TOKEN)location='/download?token='+TOKEN+'&fmt=xlsx';};
-$('#dcsv').onclick=function(){if(TOKEN)location='/download?token='+TOKEN+'&fmt=csv';};
+function dl(fmt){
+  if(!TOKEN&&!LASTURL) return;
+  var q='/download?fmt='+fmt+(TOKEN?'&token='+TOKEN:'')+(LASTURL?'&url='+encodeURIComponent(LASTURL):'');
+  location=q;
+}
+$('#dxlsx').onclick=function(){dl('xlsx');};
+$('#dcsv').onclick=function(){dl('csv');};
 
 /* support / help form */
 (function(){

@@ -1130,7 +1130,19 @@ class Handler(BaseHTTPRequestHandler):
             fmt = q.get("fmt", ["csv"])[0]
             data = RESULTS.get(token)
             if not data:
-                return self._send(404, "expired", "text/plain")
+                # Token lost (server restart / different instance): rebuild from the URL
+                # that the download link carries, so downloads never dead-end.
+                dl_url = q.get("url", [""])[0]
+                if dl_url:
+                    try:
+                        data = detect_and_scrape(dl_url, lambda n: None)
+                        RESULTS[token or uuid.uuid4().hex] = data
+                    except Exception:
+                        data = None
+                if not data:
+                    return self._send(410,
+                        "This download link expired and couldn't be rebuilt. "
+                        "Please scrape the product again.", "text/plain")
             fn = safe_name(data)
             if fmt == "xlsx":
                 body = export_xlsx_bytes(data)
